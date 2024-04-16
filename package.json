@@ -1,0 +1,25 @@
+{
+  "name": "waveformgen",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/main.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rollup --config",
+    "compile": "node dist/execute-commands.js",
+    "start": "node src/main.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "serialport": "^12.0.0",
+    "usb": "^2.12.1"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "esbuild": "0.20.2",
+    "rollup": "^4.14.1"
+  }
+}

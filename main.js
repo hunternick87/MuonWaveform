@@ -92,7 +92,7 @@ async function parseData(data) {
         await startLoading(); // Wait for loading animation to start
     }
     let adc = Number(data.split(',,')[5])
-    if ((last_adc != 0) && (adc > (adc + (last_adc * 0.3)))) { return; }
+    if ((last_adc != 0) && (adc > (last_adc + (last_adc * 0.3)))) { return; }
     last_adc = adc;
     count++;
     

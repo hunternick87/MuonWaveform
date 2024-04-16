@@ -1,0 +1,1 @@
+Serial.println((String)+ "count,," + count + ",,time_stamp,," + time_stamp+ ",,adc,," + adc+ ",,sipm_voltage,," + sipm_voltage+ ",,deadtime,," + measurement_deadtime+ ",,temp,," + temperatureC);}

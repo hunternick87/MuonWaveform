@@ -3,6 +3,7 @@ import { SerialPort } from 'serialport';
 import { ReadlineParser } from '@serialport/parser-readline'
 import fs from 'fs';
 import path from 'path';
+import { clearInterval } from 'timers';
 
 const rl = createInterface({ input: process.stdin, output: process.stdout });
 async function waitForInput(question) {
@@ -26,7 +27,24 @@ let adc_count = 0;
 let adc_array = [];
 let main_file_name = '';
 let sub_file_name = 'main.txt';
-let last_adc = 0;
+let last_adc = 53;
+let running = false;
+
+async function cleanDir() {
+    const dir = path.resolve(`./files`)
+    const files = fs.readdirSync(dir);
+    console.log(`This will delete every file in ${dir}`);
+    const check = await waitForInput("Are you sure? (y/n)");
+    if (check == ("y")) {
+        fs.writeFileSync(sub_file_name, '')
+        for (const file of files) {
+            const fi = dir + '/' + file;
+            fs.rmSync(fi);
+        }
+    } else {
+        return;
+    }
+}
 
 function writeFile(message, file_type) {
     if (file_type == 'main') {
@@ -40,10 +58,15 @@ function writeFile(message, file_type) {
 }
 
 async function WriteToFile() {
+    let checkIfClear = await waitForInput("Clear old data files? (y/n): ")
+    if (checkIfClear == ('y')) {
+        await cleanDir();
+    }
     portName = await waitForInput("Enter the port name (COM3, COM4): ");
     amplitude = await waitForInput("Starting amplitude: ");
     offset = await waitForInput("Starting offset: ");
     count_change = await waitForInput("How many counts till amplitude change (200): ");
+    last_adc = await waitForInput("Base adc (53): ");
 
     main_file_name = `data-${amplitude}mV.csv`
 
@@ -65,37 +88,32 @@ async function WriteToFile() {
 async function parseData(data) {
     if (!data.includes("count")) { return console.log(data); } // Arduino header
     if (waiting) { return; }
+    if (!running) {
+        await startLoading(); // Wait for loading animation to start
+    }
     let adc = Number(data.split(',,')[5])
-    if (adc > (last_adc + 200)) { return; }
-
+    if ((last_adc != 0) && (adc > (adc + (last_adc * 0.3)))) { return; }
     last_adc = adc;
     count++;
-    if (just_save_adc) {
-        //fs.appendFileSync('data.csv', `${data.split(' ')[3]}\n`);
-        writeFile(`${data.split(' ')[3]}\n`,'main')
-    } else {
-        const a = data.split(' ').join(',');
-        writeFile(`${a}\n`,'main')
-        //fs.appendFileSync('data.csv', `${a}\n`);
-    }
-    //console.log(data.split(',,')[5])
+    
+    writeFile(`${data}\n`, 'main');
+
     adc_array.push(adc)
-    const old_adc_sum = adc_sum;
     adc_sum += adc
     adc_count++
-    //console.log(count, (Number(count) % 20) == 0)
     if ((count % count_change) == 0) {
-        console.log(adc_sum)
+        stopLoading();
+        console.log(adc_sum);
         const adc_avg = adc_sum / adc_count;
         adc_sum = 0;
         adc_count = 0;
         const adc_sd = getStandardDeviation(adc_array);
         adc_array = [];
         console.log('avg: ', adc_avg, ", sd: ", adc_sd);
-        writeFile(`avg: ${adc_avg}, sd: ${adc_sd}, amp: ${amplitude}, offset: ${offset}\n`,'sub')
+        writeFile(`avg: ${adc_avg}, sd: ${adc_sd}, amp: ${amplitude}, offset: ${offset}\n`, 'sub');
         console.log(`${count_change} counts saved to file`);
         await waitForNewAmplitude(); // Wait for new amplitude
-        //fs.appendFileSync('data.csv', `New amplitude ${amplitude}mV\n`);
+        startLoading();
     }
 }
 
@@ -116,15 +134,15 @@ async function waitForNewAmplitude() {
     //     new_amplitude = await waitForInput("New amplitude: ");
     // }
 
-    let new_amplitude = Number(amplitude) + 2.2;
-    let new_offset = Number(offset) + (-0.2);
+    let new_amplitude = Number((Number(amplitude) + 2.2).toFixed(2));
+    let new_offset = Number((Number(offset) + (-0.2)).toFixed(2));
 
     console.log(`New Amplitude: ${new_amplitude}`)
     console.log(`New Offset: ${new_offset}`)
 
     await waitForInput("Has the amplitude been updated? (Y, n): ");
-    amplitude = new_amplitude;
-    offset = new_offset
+    amplitude = Number(new_amplitude.toFixed(2));
+    offset = Number(new_offset.toFixed(2));
 
     main_file_name = `data-${amplitude}mV.csv`
     waiting = false;
@@ -136,5 +154,26 @@ function getStandardDeviation(array) {
     return Math.sqrt(array.map(x => Math.pow(x - mean, 2)).reduce((a, b) => a + b) / n)
 }
 
+let loader = null;
+
+async function startLoading() {
+    return new Promise(resolve => {
+        running = true;
+        const P = ['\\', '|', '/', '-'];
+        const D = ['.  ', '.. ', '...']
+        let x = 0;
+        let y = 0
+        loader = setInterval(() => {
+            process.stdout.write(`\r${P[x++]} Loading${D[y++]}          On count: ${count + 1}`);
+            x %= P.length;
+            y %= D.length;
+        }, 500);
+        resolve();
+    });
+}
+
+function stopLoading() {
+    clearInterval(loader)
+}
 
 WriteToFile()

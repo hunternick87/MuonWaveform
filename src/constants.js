@@ -1,0 +1,5 @@
+export const create_new_file_on_error = true;    // Create a new file when an error occurs [ true | false ]
+export const main_file_type = 'readable';    // The file type for the main file [ readable | csv ]
+export const advanced_mode = false;    // Enable advanced mode [ true | false ]
+export const first_adc = 53;    // The first adc value [ number ]
+export const serial_port = 'COM3';    // The serial port name [ string ]

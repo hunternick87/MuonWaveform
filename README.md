@@ -61,9 +61,8 @@ https://github.com/morgan-at-keysight
 ### VISA SCPI for Javascript
 https://github.com/Jorgen-VikingGod/visa32
 
-# VISA SCPI for Matlab
+### VISA SCPI for Matlab
 https://github.com/gerardoRO/Keysight-Function-Generator
 
-
-# Other
+### Other
 https://github.com/imabot2/serialib

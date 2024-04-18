@@ -36,28 +36,29 @@ Once it does it will run a few calculations such as the average adc value, the s
 
 # Things needed
 - USB A to B cable
-- Ethernet cable
+- NI-VISA Installed
+- Keysight 33500B Series Waveform Generator
+- Arduino
 
 
 
-# Keysight 33500B Series Waveform Generator
+### Keysight 33500B Series Waveform Generator
 page 231
 https://www.keysight.com/us/en/assets/9018-03290/user-manuals/9018-03290.pdf?success=true
 
 https://www.keysight.com/us/en/search.html/33500B
 https://www.keysight.com/us/en/support/335ARB1U/arb-upgrade-1-channel-33500b-series-waveform-generators.html#
 
-
-# SCPI Language
+### SCPI Language
 https://rfmw.em.keysight.com/spdhelpfiles/33500/webhelp/us/content/__I_SCPI/00%20scpi_introduction.htm
 
-# Arduino
+### Arduino
 https://www.arduino.cc/reference/en/language/functions/communication/serial/read/
 
-# Github Examples
+### Github Examples
 https://github.com/morgan-at-keysight
 
-# VISA SCPI for Javascript
+### VISA SCPI for Javascript
 https://github.com/Jorgen-VikingGod/visa32
 
 # VISA SCPI for Matlab
